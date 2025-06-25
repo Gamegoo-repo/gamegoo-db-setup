@@ -188,9 +188,9 @@ def load_csv_with_local_infile(filepath, table_name):
         drop_indexes(cursor, table_name, indexes)
         conn.commit()
 
-        # # rds에 데이터 로드
-        # load_data_local_infile(cursor,ABS_PATH,table_name)
-        # conn.commit()
+        # rds에 데이터 로드
+        load_data_local_infile(cursor,ABS_PATH,table_name)
+        conn.commit()
 
         # 삽입 후 row 수
         cursor.execute(f"SELECT COUNT(*) FROM `{table_name}`")

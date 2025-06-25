@@ -5,6 +5,8 @@ import random
 from modules import enums
 import uuid
 from datetime import datetime
+import time
+from modules import uploader as uploader
 
 TABLE_NAME='member'
 PASSWORD = '$2a$10$OfT6f2rP7qHDLSk/2LXlh.QM6EnM0.ZWIf/nZwpufJ0YBQtvRkwlC'
@@ -33,8 +35,7 @@ def generate_unique_email():
 
     return f"{username}_{uid}@{domain}"
 
-def generate(**kwargs):
-    rows = rows = kwargs.get("rows", 10)
+def generate_csv(rows):
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
     FILE_NAME = f"{TABLE_NAME}_{rows}r_{timestamp}.csv"
     FILE_PATH = f"./csv/{FILE_NAME}"
@@ -68,4 +69,30 @@ def generate(**kwargs):
                 'created_at': rm.sample_created_at(100)
             }
             writer.writerow(row)
-    return FILE_PATH, FILE_NAME
+    
+    print(f"csv created at {FILE_PATH}")
+    return [{"filepath":FILE_PATH, "filename":FILE_NAME}]
+
+
+def run(**kwargs):
+    # step 1: csv 생성
+    print(f"[1] Generate csv ...")
+    rows = kwargs.get("rows", 10)
+    start = time.time()
+    generated = generate_csv(rows)
+    print(f"⏱️ csv 생성 소요 시간: {time.time() - start:.2f}초\n")
+
+    # step 2: S3 업로드
+    start = time.time()
+    filepath = generated[0]["filepath"]
+    filename = generated[0]["filename"]
+    print(f"[2] Uploading to s3 ...")
+    uploader.upload_to_s3(filepath, filename)
+    print(f"⏱️ S3 업로드 소요 시간: {time.time() - start:.2f}초\n")
+
+    # 3단계: RDS 업로드 (LOAD DATA LOCAL INFILE)
+    start = time.time()
+    print(f"[3] LOAD DATA LOCAL INFILE로 RDS에 삽입 중...")
+    uploader.load_csv_with_local_infile(filepath, TABLE_NAME)
+    print(f"⏱️ RDS 업로드 소요 시간: {time.time() - start:.2f}초\n")
+
