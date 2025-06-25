@@ -6,6 +6,7 @@ from modules import enums
 import uuid
 from datetime import datetime
 
+TABLE_NAME='member'
 PASSWORD = '$2a$10$OfT6f2rP7qHDLSk/2LXlh.QM6EnM0.ZWIf/nZwpufJ0YBQtvRkwlC'
 MANNER_LEVEL = 1
 BLIND = 0
@@ -32,15 +33,16 @@ def generate_unique_email():
 
     return f"{username}_{uid}@{domain}"
 
-def generate(table, count):
+def generate(**kwargs):
+    rows = rows = kwargs.get("rows", 10)
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
-    FILE_NAME = f"{table}_{count}r_{timestamp}.csv"
+    FILE_NAME = f"{TABLE_NAME}_{rows}r_{timestamp}.csv"
     FILE_PATH = f"./csv/{FILE_NAME}"
     with open(FILE_PATH, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=HEADERS)
         writer.writeheader()
 
-        for _ in range(count):
+        for _ in range(rows):
             row = {
                 'email': generate_unique_email(),
                 'puuid': rm.generate_random_string(78),
