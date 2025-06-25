@@ -1,6 +1,5 @@
 import importlib
 import time
-import argparse
 from modules import uploader as uploader
 from arg_config import build_parser 
 

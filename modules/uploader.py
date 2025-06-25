@@ -53,6 +53,25 @@ def get_index_definitions(cursor, table_name):
 
 # DROP 대상 인덱스 조회
 def get_safe_indexes_to_drop(cursor, table_name):
+    full_indexes = {}
+    indexes_to_exclude = set()
+    auto_increment_column = primary_key.DICT[table_name]
+
+    # 🔹 외래키 제약조건에 사용되는 인덱스 조회 및 제외 처리
+    cursor.execute("""
+        SELECT DISTINCT s.INDEX_NAME
+        FROM information_schema.KEY_COLUMN_USAGE k
+        JOIN information_schema.STATISTICS s
+        ON k.TABLE_SCHEMA = s.TABLE_SCHEMA
+        AND k.TABLE_NAME = s.TABLE_NAME
+        AND k.COLUMN_NAME = s.COLUMN_NAME
+        WHERE k.TABLE_SCHEMA = %s
+            AND k.TABLE_NAME = %s
+            AND k.REFERENCED_TABLE_NAME IS NOT NULL;
+    """, (DB_SCHEMA, table_name))
+    fk_index_names = {row[0] for row in cursor.fetchall()}
+    indexes_to_exclude.update(fk_index_names)
+
     cursor.execute("""
         SELECT
             s.INDEX_NAME,
@@ -66,10 +85,6 @@ def get_safe_indexes_to_drop(cursor, table_name):
           AND s.TABLE_NAME = %s
         ORDER BY s.INDEX_NAME, s.SEQ_IN_INDEX;
     """, (DB_SCHEMA, table_name))
-
-    full_indexes = {}
-    indexes_to_exclude = set()
-    auto_increment_column = primary_key.DICT[table_name]
 
     # 인덱스 전체 구성 및 auto_increment 컬럼 관련 인덱스 추출
     for index_name, column_name, seq, non_unique, index_type, comment in cursor.fetchall():
@@ -92,7 +107,7 @@ def get_safe_indexes_to_drop(cursor, table_name):
             col for col, _ in sorted(idx_info['columns'], key=lambda x: x[1])
         ]
 
-    # PRIMARY와 auto_increment 포함 인덱스 제외
+    # PRIMARY와 auto_increment, FK 포함 인덱스 제외
     safe_indexes = {
         name: info
         for name, info in full_indexes.items()
@@ -207,6 +222,7 @@ def load_csv_with_local_infile(filepath, table_name):
         except Exception as rec_err:
             print(f"❌ 인덱스 복구 실패: {rec_err}")
         finally:
+            print("☑️ 외래키 제약 조건 복구")
             cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
             conn.commit()
             cursor.close()

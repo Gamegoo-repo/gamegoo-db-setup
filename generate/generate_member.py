@@ -1,12 +1,13 @@
 import csv
-from faker import Faker
-from modules import random_modules as rm
 import random
-from modules import enums
 import uuid
-from datetime import datetime
 import time
+from faker import Faker
+from modules import enums
+from datetime import datetime
 from modules import uploader as uploader
+from modules import random_modules as rm
+
 
 TABLE_NAME='member'
 PASSWORD = '$2a$10$OfT6f2rP7qHDLSk/2LXlh.QM6EnM0.ZWIf/nZwpufJ0YBQtvRkwlC'
@@ -72,7 +73,6 @@ def generate_csv(rows):
     
     print(f"csv created at {FILE_PATH}")
     return [{"filepath":FILE_PATH, "filename":FILE_NAME}]
-
 
 def run(**kwargs):
     # step 1: csv 생성
