@@ -35,9 +35,15 @@ def sample_floats(start, end, n):
 def sample_float(start,end):
     return sample_floats(start,end,1)[0]
 
-# n일 전 ~ 오늘 까지의 랜덤 datetime(6) 문자열 추출
-def sample_created_at(n):
-    startDate = '-'+str(n)+'d'
-    dt = fake.date_time_between(start_date=startDate, end_date='now')
-    dt_str = dt.strftime("%Y-%m-%d %H:%M:%S.%f")
-    return dt_str
+# n개의 created_at 값을 datetime 기준으로 정렬된 문자열 리스트로 반환
+def generate_sorted_created_at_list(count, days_range):
+    created_at_dt_list = [
+        fake.date_time_between(start_date=f'-{days_range}d', end_date='now')
+        for _ in range(count)
+    ]
+
+    # datetime 객체 기준 정렬
+    created_at_dt_list.sort()
+
+    # 문자열(datetime(6))로 변환
+    return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in created_at_dt_list]

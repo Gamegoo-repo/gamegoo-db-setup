@@ -19,6 +19,7 @@ def generate_block_csv(member_ids, rows):
         raise ValueError(f"가능한 조합수({len(all_pairs)})보다 큰 row값은 부적합합니다.")
 
     sampled = random.sample(all_pairs, rows)
+    sorted_dates = rm.generate_sorted_created_at_list(rows,30)
 
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
     file_name = f"{TABLE_NAME}_{rows}r_{timestamp}.csv"
@@ -27,12 +28,12 @@ def generate_block_csv(member_ids, rows):
     with open(file_path, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=HEADERS)
         writer.writeheader()
-        for blocker_id, blocked_id in sampled:
+        for (blocker_id, blocked_id),created_at in zip(sampled,sorted_dates):
             row={
                 'blocker_id':blocker_id,
                 'blocked_id':blocked_id,
                 'deleted':DELETED,
-                'created_at':rm.sample_created_at(30)
+                'created_at':created_at
                 
             }
             writer.writerow(row)

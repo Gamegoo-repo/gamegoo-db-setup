@@ -16,12 +16,13 @@ BLIND = 0
 LOGIN_TYPE = 'GENERAL'
 TAG = 'KR1'
 IS_AGREE = 1
+BAN_TYPE = "NONE"
 
 HEADERS = [
     'email', 'puuid', 'password', 'profile_image', 'manner_level', 'blind',
     'login_type', 'game_name', 'tag', 'solo_tier', 'solo_rank', 'solo_win_rate',
     'free_tier', 'free_rank', 'free_win_rate', 'mainp', 'subp', 'mike',
-    'solo_game_count', 'free_game_count', 'is_agree',
+    'solo_game_count', 'free_game_count', 'is_agree','ban_type',
     'created_at'
 ]
 
@@ -40,11 +41,13 @@ def generate_csv(rows):
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
     FILE_NAME = f"{TABLE_NAME}_{rows}r_{timestamp}.csv"
     FILE_PATH = f"./csv/{FILE_NAME}"
+    sorted_dates = rm.generate_sorted_created_at_list(rows,100)
+
     with open(FILE_PATH, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=HEADERS)
         writer.writeheader()
 
-        for _ in range(rows):
+        for i in range(rows):
             row = {
                 'email': generate_unique_email(),
                 'puuid': rm.generate_random_string(78),
@@ -67,7 +70,8 @@ def generate_csv(rows):
                 'solo_game_count': rm.sample_integer(0, 1000),
                 'free_game_count': rm.sample_integer(0, 1000),
                 'is_agree': IS_AGREE,
-                'created_at': rm.sample_created_at(100)
+                'ban_type':BAN_TYPE,
+                'created_at': sorted_dates[i]
             }
             writer.writerow(row)
     
