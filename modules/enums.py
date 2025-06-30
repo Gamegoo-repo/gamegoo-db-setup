@@ -2,3 +2,10 @@ TIER = ['UNRANKED','IRON','BRONZE','SILVER','GOLD','PLATINUM','EMERALD','DIAMOND
 POSITION = ['ANY','TOP','JUNGLE','MID','ADC','SUP']
 MIKE = ['UNAVAILABLE','AVAILABLE']
 FRIEND_REQUEST_STATUS = ['PENDING','ACCEPTED','REJECTED','CANCELLED']
+NOTIFICATION_CONTENTS=[
+    '',
+    '님에게 친구 요청을 보냈어요.',
+    '님에게 친구 요청이 왔어요.',
+    '님이 친구를 수락했어요.',
+    '님이 친구를 거절했어요.'
+]

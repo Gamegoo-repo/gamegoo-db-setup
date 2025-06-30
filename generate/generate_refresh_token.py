@@ -1,25 +1,17 @@
 import csv
 import time
 import random
-from itertools import combinations
 from datetime import datetime
 from modules import uploader
 from modules import db_fetcher
-from modules import enums
 from modules import random_modules as rm
 
-TABLE_NAME = 'friend_request'
-HEADERS = ['from_member_id', 'to_member_id','status','created_at']
+TABLE_NAME = 'refresh_token'
+HEADERS = ['member_id', 'refresh_token','created_at']
 
-
-# 조합 생성 + csv 생성
-def generate_friend_request_csv(member_ids, rows):
-    all_pairs = list(combinations(member_ids, 2))  # (A, B) → A ≠ B, (1,2) == (2,1)
-
-    if rows > len(all_pairs):
-        raise ValueError(f"가능한 조합수({len(all_pairs)})보다 큰 row값은 부적합합니다.")
-
-    sampled = random.sample(all_pairs, rows)
+# csv 생성
+def generate_refresh_token_csv(member_ids):
+    rows = len(member_ids)
     sorted_dates = rm.generate_sorted_created_at_list(rows,30)
 
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
@@ -29,37 +21,34 @@ def generate_friend_request_csv(member_ids, rows):
     with open(file_path, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=HEADERS)
         writer.writeheader()
-        for (from_member_id, to_member_id), created_at in zip(sampled, sorted_dates):
+        for member_id, created_at in zip(member_ids, sorted_dates):
             row={ 
-                'from_member_id':from_member_id,
-                'to_member_id':to_member_id,
-                'status':random.choice(enums.FRIEND_REQUEST_STATUS),
+                'member_id':member_id,
+                'refresh_token':rm.generate_random_string(130),
                 'created_at':created_at
             }
-            writer.writerow(row) # A -> B row 삽입
+            writer.writerow(row)
 
     print(f"csv created at {file_path}")
     return [{"filepath": file_path, "filename": file_name}]
 
 
 def run(**kwargs):
-    rows = kwargs.get("rows")
-
     # step 1: member id 조회
     print(f"[1] Fetching member ids...")
     member_ids = [row[0] for row in db_fetcher.fetch_columns("member", ["member_id"])]
 
-    # step 2: friend_request 테이블 데이터 초기화 
+    # step 2: refresh_token 테이블 데이터 초기화 
     print(f"[2] DELETE all rows...")
     db_fetcher.delete_all_rows(TABLE_NAME)
 
     # step 3: csv 생성
-    print(f"[3] Generating {rows} friend_request rows...")
+    print(f"[3] Generating {len(member_ids)} refresh_token rows...")
     start = time.time()
     try:
-        generated = generate_friend_request_csv(member_ids, rows)
+        generated = generate_refresh_token_csv(member_ids)
     except ValueError as ve:
-        print(f"Error occuerd while generate_friend_request_csv, {ve}")
+        print(f"Error occuerd while generate_refresh_token_csv, {ve}")
         return
     print(f"⏱️ CSV 생성 소요 시간: {time.time() - start:.2f}초\n")
 
