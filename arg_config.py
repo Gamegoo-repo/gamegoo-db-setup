@@ -17,7 +17,7 @@ def build_parser():
     friend_request.add_argument("--rows",type=int,required=True,help="생성할 친구 요청 개수")
 
     member_champion = subparsers.add_parser("member_champion",help="member_champion 테이블")
-    member_champion.add_argument("--per-member",type=int, required=True,help="한 멤버당 챔피언 개수")
+    member_champion.add_argument("--per-member",type=int, required=True,choices=range(1,4),help="한 멤버당 챔피언 개수")
 
     member_game_style = subparsers.add_parser("member_game_style",help="member_game_style 테이블")
     member_game_style.add_argument('--per-member',type=int,required=True,choices=range(1, 17),help="한 멤버당 게임스타일 개수")
