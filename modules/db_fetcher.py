@@ -39,6 +39,7 @@ def fetch_columns(table: str, columns: list[str], where: str = "") -> list[tuple
     conn.close()
     return rows
 
+# 해당 테이블의 모든 row 삭제
 def delete_all_rows(table_name):
     conn = mysql.connector.connect(
         host=DB_HOST,
@@ -47,7 +48,17 @@ def delete_all_rows(table_name):
         database=DB_SCHEMA
     )
     cursor = conn.cursor()
+
+    cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+    # print("☑️ 외래키 제약 조건 비활성화")
+    conn.commit()
+
     cursor.execute(f"DELETE FROM `{table_name}`")
     conn.commit()
+
+    # print("☑️ 외래키 제약 조건 복구")
+    cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
+    conn.commit()
+
     cursor.close()
     conn.close()

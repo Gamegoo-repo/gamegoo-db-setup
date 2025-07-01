@@ -32,6 +32,7 @@ def build_parser():
 
     matching_record = subparsers.add_parser("matching_record",help="matching_record")
     matching_record.add_argument("--per-member",type=int,required=True,help="한 멤버당 매칭 레코드 개수")
+    matching_record.add_argument("--day-limit",type=int,required=True,help="매칭 레코드의 날짜 범위")
     
     manner_rating = subparsers.add_parser("manner_rating",help="manner_rating")
     manner_rating.add_argument("--per-member",type=int,required=True,help="한 멤버당 매너평가 개수")

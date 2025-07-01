@@ -17,7 +17,7 @@ def generate_member_game_style_csv(member_ids, k):
     sorted_dates = rm.generate_sorted_created_at_list(rows,30)
 
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
-    file_name = f"{TABLE_NAME}_{rows}r_{timestamp}.csv"
+    file_name = f"{TABLE_NAME}_{rows*k}r_{timestamp}.csv"
     file_path = f"./csv/{file_name}"
 
     with open(file_path, 'w', newline='') as f:

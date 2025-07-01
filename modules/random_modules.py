@@ -1,6 +1,7 @@
 import random
 import string
 from faker import Faker
+from datetime import datetime, timedelta
 
 fake = Faker()
 
@@ -35,8 +36,10 @@ def sample_floats(start, end, n):
 def sample_float(start,end):
     return sample_floats(start,end,1)[0]
 
-# n개의 created_at 값을 datetime 기준으로 정렬된 문자열 리스트로 반환
 def generate_sorted_created_at_list(count, days_range):
+    """
+    n개의 created_at 값을 datetime 기준으로 정렬된 문자열 리스트로 반환
+    """
     created_at_dt_list = [
         fake.date_time_between(start_date=f'-{days_range}d', end_date='now')
         for _ in range(count)
@@ -47,3 +50,37 @@ def generate_sorted_created_at_list(count, days_range):
 
     # 문자열(datetime(6))로 변환
     return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in created_at_dt_list]
+
+def generate_datetime_slots(base_time_list, k, gap_minutes=5):
+    """
+    각 base_time 기준으로 5분 간격의 datetime 문자열을 k개씩 생성
+    :param base_time_list: datetime(6) string list
+    :param k: 각 base_time 당 생성할 개수
+    :param gap_minutes: 간격 (기본: 5분)
+    :return: List[List[str]]
+    """
+    result = []
+    for base_str in base_time_list:
+        base_dt = datetime.strptime(base_str, "%Y-%m-%d %H:%M:%S.%f")
+        slot_list = [
+            (base_dt - timedelta(minutes=i * gap_minutes)).strftime("%Y-%m-%d %H:%M:%S.%f")
+            for i in range(k)
+        ]
+        result.append(slot_list)
+    return result
+
+
+def generate_slots_from_base(base_time_str: str, k: int, gap_minutes: int = 5) -> list[str]:
+    """
+    주어진 base_time을 기준으로 일정 간격으로 datetime(6) 문자열 k개 생성
+    base_time_str (str): 기준 시각, 형식은 '%Y-%m-%d %H:%M:%S.%f'
+    k (int): 생성할 datetime 개수
+    gap_minutes (int): 간격 (기본 5분)
+
+        List[str]: datetime 문자열 리스트 (오름차순)
+    """
+    base_dt = datetime.strptime(base_time_str, "%Y-%m-%d %H:%M:%S.%f")
+    return [
+        (base_dt - timedelta(minutes=i * gap_minutes)).strftime("%Y-%m-%d %H:%M:%S.%f")
+        for i in range(k)
+    ]

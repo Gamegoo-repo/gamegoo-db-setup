@@ -9,3 +9,13 @@ NOTIFICATION_CONTENTS=[
     '님이 친구를 수락했어요.',
     '님이 친구를 거절했어요.'
 ]
+GAMEMODE=[
+    "FAST",
+    "SOLO",
+    "FREE",
+    "ARAM"
+]
+MATCHING_TYPE=[
+    'BASIC',
+    'PRECISE'
+]

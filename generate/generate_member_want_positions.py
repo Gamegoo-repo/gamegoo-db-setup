@@ -14,7 +14,7 @@ def generate_member_want_positions_csv(member_ids,k):
     rows = len(member_ids)
 
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
-    file_name = f"{TABLE_NAME}_{rows}r_{timestamp}.csv"
+    file_name = f"{TABLE_NAME}_{rows*k}r_{timestamp}.csv"
     file_path = f"./csv/{file_name}"
 
     with open(file_path, 'w', newline='') as f:
