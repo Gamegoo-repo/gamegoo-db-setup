@@ -51,11 +51,7 @@ def run(**kwargs):
     print(f"[1] Fetching member ids...")
     member_ids = [row[0] for row in db_fetcher.fetch_columns("member", ["member_id"])]
 
-    # step 2: notification 테이블 데이터 초기화 
-    print(f"[2] DELETE all rows...")
-    db_fetcher.delete_all_rows(TABLE_NAME)
-
-    # step 3: csv 생성
+    # step 2: csv 생성
     print(f"[3] Generating {rows} notification rows...")
     start = time.time()
     try:
@@ -68,13 +64,13 @@ def run(**kwargs):
     filepath = generated[0]["filepath"]
     filename = generated[0]["filename"]
 
-    # step 4: S3 업로드
+    # step 3: S3 업로드
     # print(f"[4] Uploading to S3...")
     # start = time.time()
     # uploader.upload_to_s3(filepath, filename)
     # print(f"⏱️ S3 업로드 소요 시간: {time.time() - start:.2f}초\n")
 
-    # step 5: RDS 업로드
+    # step 4: RDS 업로드
     print(f"[5] LOAD DATA LOCAL INFILE to RDS...")
     start = time.time()
     uploader.load_csv_with_local_infile(filepath, TABLE_NAME)

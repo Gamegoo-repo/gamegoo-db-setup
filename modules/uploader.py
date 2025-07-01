@@ -53,76 +53,87 @@ def get_index_definitions(cursor, table_name):
 
 # DROP 대상 인덱스 조회
 def get_safe_indexes_to_drop(cursor, table_name):
-    full_indexes = {}
-    indexes_to_exclude = set()
-    auto_increment_column = primary_key.DICT[table_name]
+    safe_indexes={}
+    try:
+        full_indexes = {}
+        indexes_to_exclude = set()
+        auto_increment_column = {}
+        
+        if table_name in primary_key.DICT:
+            auto_increment_column = primary_key.DICT[table_name]
 
-    # 🔹 외래키 제약조건에 사용되는 인덱스 조회 및 제외 처리
-    cursor.execute("""
-        SELECT DISTINCT s.INDEX_NAME
-        FROM information_schema.KEY_COLUMN_USAGE k
-        JOIN information_schema.STATISTICS s
-        ON k.TABLE_SCHEMA = s.TABLE_SCHEMA
-        AND k.TABLE_NAME = s.TABLE_NAME
-        AND k.COLUMN_NAME = s.COLUMN_NAME
-        WHERE k.TABLE_SCHEMA = %s
-            AND k.TABLE_NAME = %s
-            AND k.REFERENCED_TABLE_NAME IS NOT NULL;
-    """, (DB_SCHEMA, table_name))
-    fk_index_names = {row[0] for row in cursor.fetchall()}
-    indexes_to_exclude.update(fk_index_names)
+        # 🔹 외래키 제약조건에 사용되는 인덱스 조회 및 제외 처리
+        cursor.execute("""
+            SELECT DISTINCT s.INDEX_NAME
+            FROM information_schema.KEY_COLUMN_USAGE k
+            JOIN information_schema.STATISTICS s
+            ON k.TABLE_SCHEMA = s.TABLE_SCHEMA
+            AND k.TABLE_NAME = s.TABLE_NAME
+            AND k.COLUMN_NAME = s.COLUMN_NAME
+            WHERE k.TABLE_SCHEMA = %s
+                AND k.TABLE_NAME = %s
+                AND k.REFERENCED_TABLE_NAME IS NOT NULL;
+        """, (DB_SCHEMA, table_name))
+        fk_index_names = {row[0] for row in cursor.fetchall()}
+        indexes_to_exclude.update(fk_index_names)
 
-    cursor.execute("""
-        SELECT
-            s.INDEX_NAME,
-            s.COLUMN_NAME,
-            s.SEQ_IN_INDEX,
-            s.NON_UNIQUE,
-            s.INDEX_TYPE,
-            s.COMMENT
-        FROM information_schema.STATISTICS s
-        WHERE s.TABLE_SCHEMA = %s
-          AND s.TABLE_NAME = %s
-        ORDER BY s.INDEX_NAME, s.SEQ_IN_INDEX;
-    """, (DB_SCHEMA, table_name))
+        cursor.execute("""
+            SELECT
+                s.INDEX_NAME,
+                s.COLUMN_NAME,
+                s.SEQ_IN_INDEX,
+                s.NON_UNIQUE,
+                s.INDEX_TYPE,
+                s.COMMENT
+            FROM information_schema.STATISTICS s
+            WHERE s.TABLE_SCHEMA = %s
+            AND s.TABLE_NAME = %s
+            ORDER BY s.INDEX_NAME, s.SEQ_IN_INDEX;
+        """, (DB_SCHEMA, table_name))
 
-    # 인덱스 전체 구성 및 auto_increment 컬럼 관련 인덱스 추출
-    for index_name, column_name, seq, non_unique, index_type, comment in cursor.fetchall():
-        if index_name not in full_indexes:
-            full_indexes[index_name] = {
-                'columns': [], # (col_name, seq)
-                'non_unique': non_unique,
-                'index_type': index_type,
-                'comment': comment
-            }
-        full_indexes[index_name]['columns'].append((column_name, seq))
+        # 인덱스 전체 구성 및 auto_increment 컬럼 관련 인덱스 추출
+        for index_name, column_name, seq, non_unique, index_type, comment in cursor.fetchall():
+            if index_name not in full_indexes:
+                full_indexes[index_name] = {
+                    'columns': [], # (col_name, seq)
+                    'non_unique': non_unique,
+                    'index_type': index_type,
+                    'comment': comment
+                }
+            full_indexes[index_name]['columns'].append((column_name, seq))
 
-        if column_name == auto_increment_column:
-            indexes_to_exclude.add(index_name)
+            if column_name == auto_increment_column:
+                indexes_to_exclude.add(index_name)
 
-    # 정렬 후 column 이름만 리스트로 변환
-    # 복합 인덱스 column 순서 반영
-    for idx_info in full_indexes.values():
-        idx_info['columns'] = [
-            col for col, _ in sorted(idx_info['columns'], key=lambda x: x[1])
-        ]
+        # 정렬 후 column 이름만 리스트로 변환
+        # 복합 인덱스 column 순서 반영
+        for idx_info in full_indexes.values():
+            idx_info['columns'] = [
+                col for col, _ in sorted(idx_info['columns'], key=lambda x: x[1])
+            ]
 
-    # PRIMARY와 auto_increment, FK 포함 인덱스 제외
-    safe_indexes = {
-        name: info
-        for name, info in full_indexes.items()
-        if name != 'PRIMARY' and name not in indexes_to_exclude
-    }
+        # PRIMARY와 auto_increment, FK 포함 인덱스 제외
+        safe_indexes = {
+            name: info
+            for name, info in full_indexes.items()
+            if name != 'PRIMARY' and name not in indexes_to_exclude
+        }
+    except Exception as error:
+        print(f"❌ DROP 가능한 인덱스 조회 중 오류 발생: {error}")
 
     print(f"☑️ DROP 가능한 인덱스 개수: {len(safe_indexes)}")
     return safe_indexes
 
 # 인덱스 백업 파일 생성
 def save_index_backup(indexes, table_name):
-    timestamp = datetime.now().strftime("%m%d_%H%M%S")
-    FILE_NAME = f"./index_backup/{table_name}_index_backup_{timestamp}.json"
-    with open(FILE_NAME, 'w') as f:
-        json.dump(indexes, f, indent=2)
+    try:
+        timestamp = datetime.now().strftime("%m%d_%H%M%S")
+        FILE_NAME = f"./index_backup/{table_name}_index_backup_{timestamp}.json"
+        with open(FILE_NAME, 'w') as f:
+            json.dump(indexes, f, indent=2)
+    except Exception as error:
+        print(f"❌ 인덱스 백업 파일 저장 중 오류 발생: {error}")
+    
     print(f"☑️ 인덱스 백업 저장: {FILE_NAME}")
     return FILE_NAME
 
@@ -195,13 +206,15 @@ def load_csv_with_local_infile(filepath, table_name):
         cursor.execute(f"SELECT COUNT(*) FROM `{table_name}`")
         before_count = cursor.fetchone()[0]
 
-        print("☑️ 외래키 제약 조건 비활성화")
+        
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+        print("☑️ 외래키 제약 조건 비활성화")
 
         indexes = get_safe_indexes_to_drop(cursor, table_name)
-        backup_file_name = save_index_backup(indexes, table_name)
-        drop_indexes(cursor, table_name, indexes)
-        conn.commit()
+        if indexes:
+            backup_file_name = save_index_backup(indexes, table_name)
+            drop_indexes(cursor, table_name, indexes)
+            conn.commit()
 
         # rds에 데이터 로드
         load_data_local_infile(cursor,ABS_PATH,table_name)
@@ -231,9 +244,10 @@ def load_csv_with_local_infile(filepath, table_name):
         return
     
     try:
-        print("🔁 인덱스 복구 중...")
-        recreate_indexes(cursor, table_name, indexes)
-        conn.commit()
+        if indexes:
+            print("🔁 인덱스 복구 중...")
+            recreate_indexes(cursor, table_name, indexes)
+            conn.commit()
 
         print("☑️ 외래키 제약 조건 복구")
         cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")

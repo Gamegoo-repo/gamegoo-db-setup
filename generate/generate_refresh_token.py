@@ -1,6 +1,5 @@
 import csv
 import time
-import random
 from datetime import datetime
 from modules import uploader
 from modules import db_fetcher
