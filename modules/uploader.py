@@ -260,3 +260,36 @@ def load_csv_with_local_infile(filepath, table_name):
     cursor.close()
     conn.close()
     print(f"✅ RDS upload complete. TABLE: {table_name}, {inserted_count} rows inserted.")
+
+# row 마다 개별 insert
+def insert_rows_from_csv(filepath,table_name):
+    # 1. DB 연결
+    conn = mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_SCHEMA
+    )
+    cursor = conn.cursor()
+
+    with open(filepath, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        headers = reader.fieldnames  # 첫 줄의 필드명 리스트
+        column_str = ', '.join(f"`{col}`" for col in headers)
+        placeholder_str = ', '.join(['%s'] * len(headers))
+
+        sql = f"""
+            INSERT INTO `{table_name}` ({column_str})
+            VALUES ({placeholder_str})
+        """
+
+        inserted = 0
+        for row in reader:
+            values = [row[col].strip() if row[col] != "" else None for col in headers]
+            cursor.execute(sql, values)
+            inserted+=1
+
+    conn.commit()
+    print(f"✅ INSERT 완료: {inserted} rows inserted into `{table_name}`.")
+    cursor.close()
+    conn.close()

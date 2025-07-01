@@ -20,10 +20,10 @@ def build_parser():
     member_champion.add_argument("--per-member",type=int, required=True,help="한 멤버당 챔피언 개수")
 
     member_game_style = subparsers.add_parser("member_game_style",help="member_game_style 테이블")
-    member_game_style.add_argument('--per-member',type=int,required=True,help="한 멤버당 게임스타일 개수")
+    member_game_style.add_argument('--per-member',type=int,required=True,choices=range(1, 17),help="한 멤버당 게임스타일 개수")
 
     member_want_positions = subparsers.add_parser("member_want_positions",help="member_want_positions")
-    member_want_positions.add_argument("--per-member",type=int,required=True,help="한 멤버당 생성할 원하는 포지션 개수")
+    member_want_positions.add_argument("--per-member",type=int,required=True,choices=range(1, 7),help="한 멤버당 생성할 원하는 포지션 개수")
 
     refresh_token = subparsers.add_parser("refresh_token", help="refresh_token 테이블")
 
