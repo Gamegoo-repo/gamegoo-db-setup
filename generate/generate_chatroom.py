@@ -23,7 +23,7 @@ NULL = '\\N'
 
 # chatroom csv 생성
 def generate_chatroom_csv(k):
-    sorted_dates = rm.generate_sorted_created_at_list(k,60,30) #  created_at 추출
+    sorted_dates = rm.generate_sorted_created_at_list_with_period(k,60,30) #  created_at 추출
 
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
     file_name = f"{CHATROOM_TABLE}_{k}r_{timestamp}.csv"

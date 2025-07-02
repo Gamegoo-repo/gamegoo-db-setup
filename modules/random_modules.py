@@ -51,7 +51,7 @@ def generate_sorted_created_at_list(count, days_range):
     # 문자열(datetime(6))로 변환
     return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in created_at_dt_list]
 
-def generate_sorted_created_at_list(count, start_days_ago, end_days_ago):
+def generate_sorted_created_at_list_with_period(count, start_days_ago, end_days_ago):
     """
     오늘로부터 start_days_ago ~ end_days_ago 사이의 랜덤 날짜 n개를 정렬된 문자열(datetime(6))로 반환
         count (int): 생성할 개수
@@ -93,7 +93,7 @@ def generate_sorted_after_created_at(base_created_at_str: str, count: int) -> li
     base_created_at 이후부터 현재까지 중에서 랜덤한 datetime(6) 문자열을 count개 생성하여 정렬 반환
         base_created_at_str (str): 기준 시각 문자열 ('%Y-%m-%d %H:%M:%S.%f')
         count (int): 생성할 개수
-        
+
         List[str]: 오름차순 정렬된 datetime(6) 문자열 리스트
     """
     base_dt = datetime.strptime(base_created_at_str, "%Y-%m-%d %H:%M:%S.%f")
