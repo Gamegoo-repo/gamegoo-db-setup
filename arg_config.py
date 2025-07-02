@@ -44,7 +44,6 @@ def build_parser():
     report.add_argument("--rows",type=int,required=True,help="생성할 신고 건수")
 
     chatroom = subparsers.add_parser("chatroom", help="chatroom 테이블")
-    chatroom.add_argument("--chatrooms", type=int, required=True, help="생성할 채팅방 수")
-    chatroom.add_argument("--messages-per-room", type=int, required=True, help="생성할 채팅방당 메시지 수")
+    chatroom.add_argument("--rooms", type=int, required=True, help="생성할 채팅방 수")
 
     return parser

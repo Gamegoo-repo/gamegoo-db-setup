@@ -51,24 +51,27 @@ def generate_sorted_created_at_list(count, days_range):
     # 문자열(datetime(6))로 변환
     return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in created_at_dt_list]
 
-def generate_datetime_slots(base_time_list, k, gap_minutes=5):
+def generate_sorted_created_at_list(count, start_days_ago, end_days_ago):
     """
-    각 base_time 기준으로 5분 간격의 datetime 문자열을 k개씩 생성
-    :param base_time_list: datetime(6) string list
-    :param k: 각 base_time 당 생성할 개수
-    :param gap_minutes: 간격 (기본: 5분)
-    :return: List[List[str]]
+    오늘로부터 start_days_ago ~ end_days_ago 사이의 랜덤 날짜 n개를 정렬된 문자열(datetime(6))로 반환
+        count (int): 생성할 개수
+        start_days_ago (int): 시작일 (오늘로부터 며칠 전)
+        end_days_ago (int): 종료일 (오늘로부터 며칠 전, start보다 작아야 함)
+        List[str]: 정렬된 datetime(6) 문자열 리스트
     """
-    result = []
-    for base_str in base_time_list:
-        base_dt = datetime.strptime(base_str, "%Y-%m-%d %H:%M:%S.%f")
-        slot_list = [
-            (base_dt - timedelta(minutes=i * gap_minutes)).strftime("%Y-%m-%d %H:%M:%S.%f")
-            for i in range(k)
-        ]
-        result.append(slot_list)
-    return result
+    if start_days_ago < end_days_ago:
+        raise ValueError("start_days_ago는 end_days_ago보다 크거나 같아야 합니다.")
 
+    start_date = datetime.now() - timedelta(days=start_days_ago)
+    end_date = datetime.now() - timedelta(days=end_days_ago)
+
+    dt_list = [
+        fake.date_time_between(start_date=start_date, end_date=end_date)
+        for _ in range(count)
+    ]
+
+    dt_list.sort()
+    return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in dt_list]
 
 def generate_slots_from_base(base_time_str: str, k: int, gap_minutes: int = 5) -> list[str]:
     """
@@ -84,3 +87,25 @@ def generate_slots_from_base(base_time_str: str, k: int, gap_minutes: int = 5) -
         (base_dt - timedelta(minutes=i * gap_minutes)).strftime("%Y-%m-%d %H:%M:%S.%f")
         for i in range(k)
     ]
+
+def generate_sorted_after_created_at(base_created_at_str: str, count: int) -> list[str]:
+    """
+    base_created_at 이후부터 현재까지 중에서 랜덤한 datetime(6) 문자열을 count개 생성하여 정렬 반환
+        base_created_at_str (str): 기준 시각 문자열 ('%Y-%m-%d %H:%M:%S.%f')
+        count (int): 생성할 개수
+        
+        List[str]: 오름차순 정렬된 datetime(6) 문자열 리스트
+    """
+    base_dt = datetime.strptime(base_created_at_str, "%Y-%m-%d %H:%M:%S.%f")
+    now = datetime.now()
+
+    if base_dt >= now:
+        raise ValueError("기준 시각은 현재 시각보다 이전이어야 합니다.")
+
+    dt_list = [
+        base_dt + (now - base_dt) * random.random()
+        for _ in range(count)
+    ]
+
+    dt_list.sort()
+    return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in dt_list]
