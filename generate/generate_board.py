@@ -39,7 +39,7 @@ def generate_board_csv(member_ids,rows):
             row={ 
                 'member_id': member_id,
                 'board_profile_image':rm.sample_integer(1,8),
-                'content':fake.paragraphs(nb=3),
+                'content':'\n'.join(fake.paragraphs(nb=3)),
                 'game_mode':random.choice(enums.GAMEMODE),
                 'mainp':random.choice(enums.POSITION),
                 'subp':random.choice(enums.POSITION),
