@@ -62,3 +62,36 @@ def delete_all_rows(table_name):
 
     cursor.close()
     conn.close()
+
+# SELECT * FROM custom query
+def fetch_query(sql: str) -> list[tuple]:
+    """
+    자유로운 SELECT 쿼리를 실행하고 결과 반환
+    """
+    conn = mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_SCHEMA,
+    )
+    cursor = conn.cursor()
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return rows
+
+# 커넥션과 커서 반환
+def get_connection_and_cursor():
+    """
+    RDS에 연결된 connection과 cursor를 반환
+    :return: (conn, cursor)
+    """
+    conn = mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_SCHEMA
+    )
+    cursor = conn.cursor()
+    return conn, cursor

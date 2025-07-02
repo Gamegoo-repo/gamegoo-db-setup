@@ -46,4 +46,8 @@ def build_parser():
     chatroom = subparsers.add_parser("chatroom", help="chatroom 테이블")
     chatroom.add_argument("--rooms", type=int, required=True, help="생성할 채팅방 수")
 
+    chat = subparsers.add_parser("chat", help="chat 테이블")
+    chat.add_argument("--rooms", type=int, required=True, help="채팅을 생성할 채팅방 개수")
+    chat.add_argument("--rows", type=int, required=True, help="한 채팅방 당 메시지 개수")
+
     return parser
