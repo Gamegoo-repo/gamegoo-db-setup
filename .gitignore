@@ -2,3 +2,4 @@
 csv/*
 index_backup/*
 .DS_Store
+payloads/json/*
