@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 MATCHING_RECORD_TABLE = 'matching_record'
 MATCHING_RECORD_HEADERS = ['matching_uuid', 'member_id','target_matching_uuid',
            'game_mode','matching_type','game_rank','manner_level','winrate',
-           'mainp','subp','wantp','tier','mike',
+           'mainp','subp','tier','mike',
            'status','manner_message_sent','created_at']
 
 WANT_POSITIONS_TABLE = 'matching_record_want_positions'
@@ -60,7 +60,6 @@ def generate_matching_record_csv(member_ids, k,day):
                     'winrate':rm.sample_float(0, 100),
                     'mainp':random.choice(enums.POSITION),
                     'subp':random.choice(enums.POSITION),
-                    'wantp':NULL,
                     'tier':random.choice(enums.TIER),
                     'mike':random.choice(enums.MIKE),
                     'status':get_status_by_time(created_at_list[i]),
@@ -76,7 +75,7 @@ def generate_matching_record_csv(member_ids, k,day):
 # matching_uuid별 want_position csv 생성
 def generate_matching_record_want_positions_csv(matching_record_uuids):
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
-    file_name = f"{WANT_POSITIONS_TABLE}_{len(matching_record_uuids)}r_{timestamp}.csv"
+    file_name = f"{WANT_POSITIONS_TABLE}_{len(matching_record_uuids)*2}r_{timestamp}.csv"
     file_path = f"./csv/{file_name}"
 
     with open(file_path, 'w', newline='') as f:

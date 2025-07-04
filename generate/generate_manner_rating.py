@@ -58,8 +58,6 @@ def generate_manner_rating_keyword_csv(manner_ratings):
     file_name = f"{RATING_KEYWORD_TABLE}_{len(manner_ratings)*3}r_{timestamp}.csv"
     file_path = f"./csv/{file_name}"
 
-    print(manner_ratings)
-
     with open(file_path, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=RATING_KEYWORD_HEADERS)
         writer.writeheader()
