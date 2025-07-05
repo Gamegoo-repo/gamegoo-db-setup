@@ -25,6 +25,8 @@ def build_parser():
     member_want_positions = subparsers.add_parser("member_want_positions",help="member_want_positions")
     member_want_positions.add_argument("--per-member",type=int,required=True,choices=range(1, 7),help="한 멤버당 생성할 원하는 포지션 개수")
 
+    member_recent_stats = subparsers.add_parser("member_recent_stats", help="member_recent_stats")
+
     refresh_token = subparsers.add_parser("refresh_token", help="refresh_token 테이블")
 
     notification = subparsers.add_parser("notification",help="notification")
