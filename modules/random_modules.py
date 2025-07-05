@@ -109,3 +109,21 @@ def generate_sorted_after_created_at(base_created_at_str: str, count: int) -> li
 
     dt_list.sort()
     return [dt.strftime("%Y-%m-%d %H:%M:%S.%f") for dt in dt_list]
+
+def random_iso8601_datetime(start: str, end: str = None) -> str:
+    """
+    시작(start) ~ 종료(end) 구간 중 랜덤한 ISO 8601 형식 LocalDateTime 문자열 반환.
+    end가 주어지지 않으면 현재 시각을 사용.
+    
+    :param start: "YYYY-MM-DDTHH:MM:SS" 형식 문자열
+    :param end: "YYYY-MM-DDTHH:MM:SS" 형식 문자열 (옵션, default: 현재 시각)
+    :return: ISO 8601 형식 문자열
+    """
+    start_dt = datetime.fromisoformat(start)
+    end_dt = datetime.fromisoformat(end) if end else datetime.now()
+
+    delta = end_dt - start_dt
+    random_seconds = random.randint(0, int(delta.total_seconds()))
+    random_dt = start_dt + timedelta(seconds=random_seconds)
+
+    return random_dt.isoformat(timespec='seconds')
