@@ -65,5 +65,5 @@ def run(**kwargs):
     # step 5: RDS 업로드
     print(f"[5] INSERT ALL ROWS to RDS...")
     start = time.time()
-    uploader.insert_rows_from_csv(filepath, TABLE_NAME)
+    uploader.insert_rows_from_csv_batch(filepath, TABLE_NAME)
     print(f"⏱️ RDS 업로드 소요 시간: {time.time() - start:.2f}초\n")

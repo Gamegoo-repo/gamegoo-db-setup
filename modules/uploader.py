@@ -293,3 +293,48 @@ def insert_rows_from_csv(filepath,table_name):
     print(f"✅ INSERT 완료: {inserted} rows inserted into `{table_name}`.")
     cursor.close()
     conn.close()
+
+
+def insert_rows_from_csv_batch(filepath, table_name, batch_size=1000):
+    # 1. DB 연결
+    conn = mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_SCHEMA
+    )
+    cursor = conn.cursor()
+
+    with open(filepath, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        headers = reader.fieldnames  # 첫 줄의 필드명 리스트
+        column_str = ', '.join(f"`{col}`" for col in headers)
+        placeholder_str = ', '.join(['%s'] * len(headers))
+
+        sql = f"""
+            INSERT INTO `{table_name}` ({column_str})
+            VALUES ({placeholder_str})
+        """
+
+        batch = []
+        total_inserted = 0
+
+        for row in reader:
+            values = [row[col].strip() if row[col] != "" else None for col in headers]
+            batch.append(values)
+
+            if len(batch) >= batch_size:
+                cursor.executemany(sql, batch)
+                total_inserted += len(batch)
+                batch.clear()
+                print("batch inserted")
+
+        # 마지막 남은 데이터
+        if batch:
+            cursor.executemany(sql, batch)
+            total_inserted += len(batch)
+
+    conn.commit()
+    print(f"✅ INSERT 완료: {total_inserted} rows inserted into `{table_name}`.")
+    cursor.close()
+    conn.close()

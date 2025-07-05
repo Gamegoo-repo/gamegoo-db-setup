@@ -141,18 +141,30 @@ def run(**kwargs):
     start = time.time()
     try:
         conn, cursor = db_fetcher.get_connection_and_cursor()
-        for chatroom_id, created_at, chat_id in latest_rows:
-            cursor.execute("""
-                UPDATE chatroom
-                SET last_chat_at = %s, last_chat_id = %s, updated_at = %s
-                WHERE chatroom_id = %s
-            """, (created_at, chat_id, created_at,chatroom_id))
+
+        sql = """
+            UPDATE chatroom
+            SET last_chat_at = %s, last_chat_id = %s, updated_at = %s
+            WHERE chatroom_id = %s
+        """
+
+        batch_size = 1000
+        total_updated = 0
+
+        for i in range(0, len(latest_rows), batch_size):
+            batch = latest_rows[i:i + batch_size]
+            values = [(created_at, chat_id, created_at, chatroom_id) for chatroom_id, created_at, chat_id in batch]
+            cursor.executemany(sql, values)
+            total_updated += len(values)
+            print("batch updated:",i)
+
         conn.commit()
         cursor.close()
         conn.close()
     except Exception as error:
-        print(f"Error occuerd while Updating chatroom, {error}")
+        print(f"Error occurred while updating chatroom: {error}")
         return
+    print(f"✅ chatroom 테이블 배치 업데이트 완료: {total_updated} rows")
     print(f"⏱️ chatroom 테이블 업로드 소요 시간: {time.time() - start:.2f}초\n")
 
     # step 8: S3 업로드

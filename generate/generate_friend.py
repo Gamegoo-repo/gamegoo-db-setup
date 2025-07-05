@@ -22,7 +22,7 @@ def generate_friend_csv(member_ids, pairs):
     sorted_dates = rm.generate_sorted_created_at_list(pairs,30)
 
     timestamp = datetime.now().strftime("%m%d_%H%M%S")
-    file_name = f"{TABLE_NAME}_{pairs}r_{timestamp}.csv"
+    file_name = f"{TABLE_NAME}_{len(sampled)}r_{timestamp}.csv"
     file_path = f"./csv/{file_name}"
 
     with open(file_path, 'w', newline='') as f:

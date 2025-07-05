@@ -173,7 +173,7 @@ def run(**kwargs):
     # step 11: board_want_positions RDS 업로드
     print(f"[11] INSERT ALL ROWS - {want_position_filename} to RDS...")
     start = time.time()
-    uploader.insert_rows_from_csv(want_position_filepath, BOARD_WANT_POSITION_TABLE)
+    uploader.insert_rows_from_csv_batch(want_position_filepath, BOARD_WANT_POSITION_TABLE)
     print(f"⏱️ RDS 업로드 소요 시간: {time.time() - start:.2f}초\n")
 
     # step 12, 13: S3 업로드
