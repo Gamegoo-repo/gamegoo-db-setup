@@ -9,15 +9,17 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 from modules import db_fetcher
 from modules import random_modules as rm
 
+VUSERS = 400
 PAYLOAD_NAME = os.path.splitext(os.path.basename(__file__))[0] # 현재 파일 이름에서 확장자 제거
 
-input_csv_path = "email_chatroomUuid.csv"
+input_csv_path = "Result_18.csv"
 # 이메일별 UUID 저장용 딕셔너리
 email_to_uuids = defaultdict(list)
 
 MEMBER_PASSWORD="12345678"
 
 # step 1: csv 파일 읽기
+member_emails = []
 print(f"[1] Read csv...")
 with open(input_csv_path, newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
@@ -26,8 +28,9 @@ with open(input_csv_path, newline='', encoding='utf-8') as csvfile:
             continue  # 유효하지 않은 라인 건너뜀
         email, uuid = row
         email_to_uuids[email].append(uuid)
+        member_emails.append(email)
 
-VUSERS = len(email_to_uuids)
+sampled_emails = random.sample(member_emails,VUSERS)
 
 # payload json 생성
 file_name = f"{PAYLOAD_NAME}_{VUSERS}vus.json"
@@ -35,11 +38,10 @@ file_dir = os.path.join(os.path.dirname(__file__), "../json")
 file_path = os.path.join(file_dir, file_name)
 
 print(f"[2] Generating payloads...")
-
 payload_data = []
 
-for email, uuid_list in email_to_uuids.items():
-    payloads = [{"path": {"chatroomUuid": uid}} for uid in uuid_list]
+for email in sampled_emails:
+    payloads = [{"path": {"chatroomUuid": uid}} for uid in email_to_uuids[email]]
     payload_data.append({
         "email": email,
         "password":MEMBER_PASSWORD,

@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 from modules import db_fetcher
 from modules import random_modules as rm
 
-# PAYLOADS_PER_USER = 20
+VUSERS = 400
 PAYLOAD_NAME = os.path.splitext(os.path.basename(__file__))[0] # 현재 파일 이름에서 확장자 제거
 
 MEMBER_PASSWORD="12345678"
@@ -15,7 +15,6 @@ MEMBER_PASSWORD="12345678"
 # step 1: member 조회
 print(f"[1] Fetching member...")
 member_emails = [row[0] for row in db_fetcher.fetch_columns("member", ["email"])]
-VUSERS = len(member_emails)
 
 # payload json 생성
 file_name = f"{PAYLOAD_NAME}_{VUSERS}vus.json"
@@ -26,9 +25,9 @@ print(f"[2] Generating payloads...")
 
 # VUSERS개의 요청을 담을 리스트
 payload_data = []
+sampled_emails = random.sample(member_emails,VUSERS)
 
-for _ in range(VUSERS):
-    email = random.choice(member_emails)
+for email in sampled_emails:
     payload_data.append({
         "email": email,
         "password":MEMBER_PASSWORD,

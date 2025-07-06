@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 from modules import db_fetcher
 from modules import random_modules as rm
 
-VUSERS = 250
+VUSERS = 500
 PAYLOADS_PER_USER = 10
 PAYLOAD_NAME = os.path.splitext(os.path.basename(__file__))[0] # 현재 파일 이름에서 확장자 제거
 

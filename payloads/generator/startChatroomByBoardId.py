@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 from modules import db_fetcher
 from modules import random_modules as rm
 
-VUSERS = 300
+VUSERS = 400
 PAYLOADS_PER_USER = 20
 PAYLOAD_NAME = os.path.splitext(os.path.basename(__file__))[0] # 현재 파일 이름에서 확장자 제거
 
@@ -21,7 +21,7 @@ member_emails = [row[0] for row in db_fetcher.fetch_columns("member", ["email"])
 
 # step 2: board id 조회
 print(f"[1] Fetching board ids...")
-board_ids = [row[0] for row in db_fetcher.fetch_columns("board", ["board_id"])]
+board_ids = [row[0] for row in db_fetcher.fetch_columns("board", ["board_id"],"deleted = false")]
 
 # payload json 생성
 file_name = f"{PAYLOAD_NAME}_{VUSERS}vus.json"

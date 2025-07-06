@@ -8,7 +8,7 @@ from modules import db_fetcher
 from modules import random_modules as rm
 from modules import enums
 
-VUSERS = 70
+VUSERS = 400
 PAYLOADS_PER_USER = 20
 PAYLOAD_NAME = os.path.splitext(os.path.basename(__file__))[0] # 현재 파일 이름에서 확장자 제거
 
